@@ -1,48 +1,110 @@
 #include <stdio.h>
 #include "get_next_line.h"
 
-char *get_next_line(int fd)
+char *ft_strdup(const char *s)
 {
-	// size_t		res;
-	static char	file[BUFFER_SIZE];
-	int			i;
+	char *dup;
+	size_t i;
 
-	if (!fd || fd == -1 || !BUFFER_SIZE)
+	dup = malloc(ft_strlen(s) + 1);
+	if (dup == NULL)
 		return (0);
 	i = 0;
-	while (i < BUFFER_SIZE && file[i - 1] != '\n')
+	while (s[i])
 	{
-		read(fd, file + i, 1);
-		// printf("\nfile: %c\n",file[i]);
-		// line[i] = (char)file[i];
+		dup[i] = s[i];
 		i++;
 	}
-	// printf("\nline: %s\n", file);
-
-	// // res = read(fd, file, BUFFER_SIZE);
-
-	// // printf("file2: %s\n", file);
-	return (file);
+	dup[i] = '\0';
+	return (dup);
 }
 
-// #include <sys/types.h>
-// #include <sys/stat.h>
-// #include <fcntl.h>
-// int main (void)
-// {
+char *ft_strchr(const char *s, int c)
+{
+	int i;
 
-// 	int fd = open("./teste.txt", O_RDONLY);
-// 	// char *test;
-// 	// test = get_next_line(fd);
-// 	// if (fd == -1)
-// 	// 	printf("error fd\n");
-// 	// else
-// 	// 	printf("sucesso fd: %d\n", fd);
-// 	// printf("bytes: %d\n", BUFFER_SIZE);
-// 	printf("test1: %s\n", get_next_line(fd));
-// 	printf("test2: %s\n", get_next_line(fd));
-// 	printf("test3: %s\n", get_next_line(fd));
-// 	printf("test4: %s\n", get_next_line(fd));
-// 	close(fd);
-// }
-// // gcc -Wall -Wextra -Werror -D BUFFER_SIZE=42 get_next_line.c get_next_line_utils.c
+	i = 0;
+	while (s[i])
+	{
+		if ((char)c == s[i])
+			return ((char *)&s[i]);
+		i++;
+	}
+	if ((char)c == '\0')
+		return ((char *)&s[i]);
+	return (0);
+}
+
+char *get_next_line(int fd)
+{
+	static char *file;
+	char *line;
+	char *str;
+	char *temp;
+	int i;
+	ssize_t res;
+
+	res = read(fd, file, 0);
+	if (fd < 0 || res == -1 || !BUFFER_SIZE)
+		return (NULL);
+	line = malloc((BUFFER_SIZE + 1) * sizeof(char));
+	i = read(fd, line, BUFFER_SIZE);
+	if (i == 0 && !file)
+	{
+		free(line);
+		line = NULL;
+		return (NULL);
+	}
+	if (!file)
+		file = ft_strdup("");
+	str = ft_strdup("");
+	temp = ft_strdup("");
+	while (i)
+	{
+		line[i] = '\0';
+		temp = ft_strdup(file);
+		free(file);
+		file = ft_strjoin(temp, line);
+		// printf("file: %s", line);
+		temp = ft_strdup(str);
+		free(str);
+		str = ft_strjoin(temp, line);
+		// printf("i: %d", i);
+		if (ft_strchr(line, '\n')) break;
+		i = read(fd, line, BUFFER_SIZE);	
+	}
+	if (i == 0)
+	{
+		free(file);
+		file = NULL;
+	}
+	free(line);
+	line = NULL;
+	return (str);
+}
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+int main (void)
+{
+
+	int fd = open("./teste2.txt", O_RDONLY);
+	int i;
+	// char *test;
+	// test = get_next_line(fd);
+	// if (fd == -1)
+	// 	printf("error fd\n");
+	// else
+	// 	printf("sucesso fd: %d\n", fd);
+	// printf("bytes: %d\n", BUFFER_SIZE);
+	i = 1;
+
+	while (i < 8)
+	{
+		printf("test%d: %s\n", i, get_next_line(fd));
+		i++;
+	}
+	close(fd);
+}
+// // // gcc -Wall -Wextra -Werror -D BUFFER_SIZE=42 get_next_line.c get_next_line_utils.c
