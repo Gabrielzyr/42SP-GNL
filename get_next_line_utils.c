@@ -85,7 +85,5 @@ char *ft_strjoin(char *s1, char *s2)
 		return (0);
 	ft_memcpy(new_str, s1, s1_len);
 	ft_strlcat(new_str, s2, (s1_len + s2_len + 1));
-	free(s1);
-	s1 = NULL;
 	return (new_str);
 }

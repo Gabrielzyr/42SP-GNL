@@ -35,52 +35,78 @@ char *ft_strchr(const char *s, int c)
 	return (0);
 }
 
-char *get_next_line(int fd)
+char *get_line(char *line, char *buffer)
 {
-	static char *file;
-	char *line;
-	char *str;
+	static char *buffer_save;
 	char *temp;
-	int i;
-	ssize_t res;
+	size_t i;
+	size_t buf_len;
 
-	res = read(fd, file, 0);
-	if (fd < 0 || res == -1 || !BUFFER_SIZE)
-		return (NULL);
-	line = malloc((BUFFER_SIZE + 1) * sizeof(char));
-	i = read(fd, line, BUFFER_SIZE);
-	if (i == 0 && !file)
+	i = 0;
+	if (!buffer_save)
+		buffer_save = ft_strdup("");
+	buffer_save = ft_strjoin(buffer_save, buffer);
+	free(buffer);
+	while (buffer_save[i] != '\n' && buffer_save[i])
+		i++;
+	if (buffer_save[i] == '\n')
+		i++;
+	line = ft_calloc(i + 1, sizeof(char));
+	if (!line)
 	{
 		free(line);
-		line = NULL;
-		return (NULL);
+		return (0);
 	}
-	if (!file)
-		file = ft_strdup("");
-	str = ft_strdup("");
+	line = ft_memcpy(line, buffer_save, i);
+	buf_len = 0;
+	while (buffer_save[buf_len])
+		buf_len++;
 	temp = ft_strdup("");
+	ft_memcpy(temp, buffer_save+i, buf_len - i);
+	free(buffer_save);
+	buffer_save = ft_strdup(temp);
+	free(temp);
+	return (line);
+}
+
+char *get_read_file(int fd, char *buffer, char *line)
+{
+	char *temp_buffer;
+	ssize_t i;
+
+	if (!buffer)
+		buffer = ft_strdup("");
+	temp_buffer = malloc ((BUFFER_SIZE + 1) * sizeof(char));
+	i = 1;
 	while (i)
 	{
-		line[i] = '\0';
-		temp = ft_strdup(file);
-		free(file);
-		file = ft_strjoin(temp, line);
-		// printf("file: %s", line);
-		temp = ft_strdup(str);
-		free(str);
-		str = ft_strjoin(temp, line);
-		// printf("i: %d", i);
-		if (ft_strchr(line, '\n')) break;
-		i = read(fd, line, BUFFER_SIZE);	
+		i = read(fd, temp_buffer, BUFFER_SIZE);
+		buffer = ft_strjoin(buffer, temp_buffer);
+		if (ft_strchr(buffer, '\n'))
+			break;
+		else if (i <= 0)
+			break;
 	}
-	if (i == 0)
-	{
-		free(file);
-		file = NULL;
-	}
-	free(line);
-	line = NULL;
-	return (str);
+	free(temp_buffer);
+	line = get_line(line, buffer);
+	return (line);
+}
+
+char *get_next_line(int fd)
+{
+	static char *buffer = NULL;
+	char *line;
+	ssize_t res;
+
+	res = read(fd, buffer, 0);
+	if (fd < 0 || res == -1 || !BUFFER_SIZE)
+		return (NULL);
+	line = ft_strdup("");
+	line = get_read_file(fd, buffer, line);
+	if (!line)
+		return (0);
+	// printf("buffer2: %s\n", buffer);
+	return (line);
 }
 
 #include <sys/types.h>
@@ -89,7 +115,7 @@ char *get_next_line(int fd)
 int main (void)
 {
 
-	int fd = open("./teste2.txt", O_RDONLY);
+	int fd = open("./teste.txt", O_RDONLY);
 	int i;
 	// char *test;
 	// test = get_next_line(fd);
@@ -100,11 +126,13 @@ int main (void)
 	// printf("bytes: %d\n", BUFFER_SIZE);
 	i = 1;
 
-	while (i < 8)
+	while (i < 14)
 	{
-		printf("test%d: %s\n", i, get_next_line(fd));
+		printf("\ntest%d: %s\n", i, get_next_line(fd));
+		// get_next_line(fd);
 		i++;
 	}
+	// printf("test1: %s\n", get_next_line(fd));
 	close(fd);
 }
 // // // gcc -Wall -Wextra -Werror -D BUFFER_SIZE=42 get_next_line.c get_next_line_utils.c
