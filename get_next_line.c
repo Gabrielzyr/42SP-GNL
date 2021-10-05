@@ -45,23 +45,22 @@ char *get_line(char *line, char *buffer)
 	i = 0;
 	if (!buffer_save)
 		buffer_save = ft_strdup("");
-	buffer_save = ft_strjoin(buffer_save, buffer);
 	if (ft_strlen(buffer_save) == 0 && ft_strlen(buffer) == 0)
 	{
 		free(buffer_save);
-		free(buffer);
+		buffer_save = NULL;
 		return (NULL);
 	}
-	free(buffer);
+	buffer_save = ft_strjoin(buffer_save, buffer);
 	while (buffer_save[i] != '\n' && buffer_save[i])
 		i++;
 	if (buffer_save[i] == '\n')
 		i++;
-	line = ft_calloc(i + 1, sizeof(char));
+	line = malloc((i + 1) * sizeof(char));
 	if (!line)
 	{
 		free(line);
-		return (0);
+		return (NULL);
 	}
 	line = ft_memcpy(line, buffer_save, i);
 	buf_len = 0;
@@ -87,14 +86,21 @@ char *get_read_file(int fd, char *buffer, char *line)
 	while (i)
 	{
 		i = read(fd, temp_buffer, BUFFER_SIZE);
+		if (i <= 0)
+			break;
 		buffer = ft_strjoin(buffer, temp_buffer);
 		if (ft_strchr(buffer, '\n'))
-			break;
-		else if (i <= 0)
 			break;
 	}
 	free(temp_buffer);
 	line = get_line(line, buffer);
+	if (!line)
+	{
+		free(line);
+		line = NULL;
+	}
+	free(buffer);
+	buffer = NULL;
 	return (line);
 }
 
@@ -110,7 +116,11 @@ char *get_next_line(int fd)
 	line = ft_strdup("");
 	line = get_read_file(fd, buffer, line);
 	if (!line)
-		return (0);
+	{
+		free(line);
+		line = NULL;
+		return (line);
+	}
 	// printf("buffer2: %s\n", buffer);
 	return (line);
 }
@@ -121,7 +131,7 @@ char *get_next_line(int fd)
 // int main (void)
 // {
 
-// 	int fd = open("./teste.txt", O_RDONLY);
+// 	int fd = open("./teste3.txt", O_RDONLY);
 // 	int i;
 // 	// char *test;
 // 	// test = get_next_line(fd);
@@ -132,7 +142,7 @@ char *get_next_line(int fd)
 // 	// printf("bytes: %d\n", BUFFER_SIZE);
 // 	i = 1;
 
-// 	while (i < 14)
+// 	while (i < 6)
 // 	{
 // 		printf("\ntest%d: %s\n", i, get_next_line(fd));
 // 		// get_next_line(fd);

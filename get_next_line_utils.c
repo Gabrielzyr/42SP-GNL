@@ -82,7 +82,10 @@ char *ft_strjoin(char *s1, char *s2)
 	s2_len = ft_strlen(s2);
 	new_str = ft_calloc((s1_len + s2_len + 1), sizeof(char));
 	if (!new_str)
+	{
+		free(new_str);
 		return (0);
+	}
 	ft_memcpy(new_str, s1, s1_len);
 	ft_strlcat(new_str, s2, (s1_len + s2_len + 1));
 	return (new_str);
