@@ -46,6 +46,12 @@ char *get_line(char *line, char *buffer)
 	if (!buffer_save)
 		buffer_save = ft_strdup("");
 	buffer_save = ft_strjoin(buffer_save, buffer);
+	if (ft_strlen(buffer_save) == 0 && ft_strlen(buffer) == 0)
+	{
+		free(buffer_save);
+		free(buffer);
+		return (NULL);
+	}
 	free(buffer);
 	while (buffer_save[i] != '\n' && buffer_save[i])
 		i++;
@@ -109,30 +115,30 @@ char *get_next_line(int fd)
 	return (line);
 }
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-int main (void)
-{
+// #include <sys/types.h>
+// #include <sys/stat.h>
+// #include <fcntl.h>
+// int main (void)
+// {
 
-	int fd = open("./teste.txt", O_RDONLY);
-	int i;
-	// char *test;
-	// test = get_next_line(fd);
-	// if (fd == -1)
-	// 	printf("error fd\n");
-	// else
-	// 	printf("sucesso fd: %d\n", fd);
-	// printf("bytes: %d\n", BUFFER_SIZE);
-	i = 1;
+// 	int fd = open("./teste.txt", O_RDONLY);
+// 	int i;
+// 	// char *test;
+// 	// test = get_next_line(fd);
+// 	// if (fd == -1)
+// 	// 	printf("error fd\n");
+// 	// else
+// 	// 	printf("sucesso fd: %d\n", fd);
+// 	// printf("bytes: %d\n", BUFFER_SIZE);
+// 	i = 1;
 
-	while (i < 14)
-	{
-		printf("\ntest%d: %s\n", i, get_next_line(fd));
-		// get_next_line(fd);
-		i++;
-	}
-	// printf("test1: %s\n", get_next_line(fd));
-	close(fd);
-}
-// // // gcc -Wall -Wextra -Werror -D BUFFER_SIZE=42 get_next_line.c get_next_line_utils.c
+// 	while (i < 14)
+// 	{
+// 		printf("\ntest%d: %s\n", i, get_next_line(fd));
+// 		// get_next_line(fd);
+// 		i++;
+// 	}
+// 	// printf("test1: %s\n", get_next_line(fd));
+// 	close(fd);
+// }
+// // // // gcc -Wall -Wextra -Werror -D BUFFER_SIZE=42 get_next_line.c get_next_line_utils.c
