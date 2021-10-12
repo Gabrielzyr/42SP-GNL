@@ -1,154 +1,132 @@
 #include <stdio.h>
 #include "get_next_line.h"
 
-char *ft_strdup(const char *s)
+static char *get_line(char *buffer)
 {
-	char *dup;
-	size_t i;
-
-	dup = malloc(ft_strlen(s) + 1);
-	if (dup == NULL)
-		return (0);
-	i = 0;
-	while (s[i])
-	{
-		dup[i] = s[i];
-		i++;
-	}
-	dup[i] = '\0';
-	return (dup);
-}
-
-char *ft_strchr(const char *s, int c)
-{
-	int i;
-
-	i = 0;
-	while (s[i])
-	{
-		if ((char)c == s[i])
-			return ((char *)&s[i]);
-		i++;
-	}
-	if ((char)c == '\0')
-		return ((char *)&s[i]);
-	return (0);
-}
-
-char *get_line(char *line, char *buffer)
-{
-	static char *buffer_save;
+	char *line;
 	char *temp;
 	size_t i;
 	size_t buf_len;
 
 	i = 0;
-	if (!buffer_save)
-		buffer_save = ft_strdup("");
-	if (ft_strlen(buffer_save) == 0 && ft_strlen(buffer) == 0)
-	{
-		free(buffer_save);
-		buffer_save = NULL;
-		return (NULL);
-	}
-	buffer_save = ft_strjoin(buffer_save, buffer);
-	while (buffer_save[i] != '\n' && buffer_save[i])
+	while (buffer[i] != '\n' && buffer[i])
 		i++;
-	if (buffer_save[i] == '\n')
-		i++;
-	line = malloc((i + 1) * sizeof(char));
-	if (!line)
+	if (buffer[i] == '\n')
 	{
-		free(line);
-		return (NULL);
+		line = ft_substr(buffer, 0, i+1);
+		temp = ft_strdup("");
+		buf_len = 0;
+		while (buffer[buf_len])
+			buf_len++;
+		temp = ft_strdup(buffer + (i+1));
+		free(buffer);
+		buffer = NULL;
+		if (*temp)
+		{
+			printf("error");
+			buffer = ft_strdup(temp);
+		}
+		free (temp);
 	}
-	line = ft_memcpy(line, buffer_save, i);
-	buf_len = 0;
-	while (buffer_save[buf_len])
-		buf_len++;
-	temp = ft_strdup("");
-	ft_memcpy(temp, buffer_save+i, buf_len - i);
-	free(buffer_save);
-	buffer_save = ft_strdup(temp);
-	free(temp);
+	else
+	{
+		line = ft_strdup(buffer);
+		free(buffer);
+		buffer = NULL;
+		printf("\nbuffer no line: %s\n", buffer);
+
+		return(line);
+	}
+	printf("\nbuffer no line: %s\n", buffer);
 	return (line);
 }
 
-char *get_read_file(int fd, char *buffer, char *line)
+static char *get_read_file(int fd)
 {
+	// char *line;
+	static char *buffer;
 	char *temp_buffer;
+	char *temp;
+	size_t buf_len;
 	ssize_t i;
 
-	if (!buffer)
-		buffer = ft_strdup("");
-	temp_buffer = malloc ((BUFFER_SIZE + 1) * sizeof(char));
-	i = 1;
-	while (i)
+	temp_buffer = ft_strdup("");
+	// printf("temp1: %s", temp_buffer);
+	i = read(fd, temp_buffer, BUFFER_SIZE);
+	// printf("temp2: %s", temp_buffer);
+	printf("buffer: %s", buffer);
+	while (i > 0)
 	{
-		i = read(fd, temp_buffer, BUFFER_SIZE);
-		if (i <= 0)
-			break;
-		buffer = ft_strjoin(buffer, temp_buffer);
+		printf("aqui %lu", i);
+		temp_buffer[i] = '\0';
+		if (!buffer)
+			buffer = ft_strdup("");
+		temp = ft_strdup(buffer);
+		free(buffer);
+		buffer = ft_strjoin(temp, temp_buffer);
 		if (ft_strchr(buffer, '\n'))
 			break;
+		i = read(fd, temp_buffer, BUFFER_SIZE);
 	}
 	free(temp_buffer);
-	line = get_line(line, buffer);
-	if (!line)
-	{
-		free(line);
-		line = NULL;
-	}
-	free(buffer);
-	buffer = NULL;
-	return (line);
+	buf_len = 0;
+	while(buffer[buf_len])
+		buf_len++;
+	if (i == 0 && buffer == 0)
+		return (NULL);
+	return (get_line(buffer));
 }
 
 char *get_next_line(int fd)
 {
-	static char *buffer = NULL;
-	char *line;
+	char *buffer;
+	// char *line;
 	ssize_t res;
 
+	buffer = NULL;
 	res = read(fd, buffer, 0);
-	if (fd < 0 || res == -1 || !BUFFER_SIZE)
+	if (fd < 0 || res == -1 || BUFFER_SIZE < 1)
 		return (NULL);
-	line = ft_strdup("");
-	line = get_read_file(fd, buffer, line);
-	if (!line)
-	{
-		free(line);
-		line = NULL;
-		return (line);
-	}
-	// printf("buffer2: %s\n", buffer);
-	return (line);
+	// line = ft_strdup("");
+	// line = get_read_file(fd, buffer, line);
+	// if (line >= 0)
+	// {
+	// 	free(line);
+	// 	line = NULL;
+	// 	return (line);
+	// }
+	return (get_read_file(fd));
 }
 
-// #include <sys/types.h>
-// #include <sys/stat.h>
-// #include <fcntl.h>
-// int main (void)
-// {
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+int main (void)
+{
 
-// 	int fd = open("./teste3.txt", O_RDONLY);
-// 	int i;
-// 	// char *test;
-// 	// test = get_next_line(fd);
-// 	// if (fd == -1)
-// 	// 	printf("error fd\n");
-// 	// else
-// 	// 	printf("sucesso fd: %d\n", fd);
-// 	// printf("bytes: %d\n", BUFFER_SIZE);
-// 	i = 1;
+	int fd = open("./teste3.txt", O_RDONLY);
+	int i;
+	char *a;
+	// char *test;
+	// test = get_next_line(fd);
+	// if (fd == -1)
+	// 	printf("error fd\n");
+	// else
+	// 	printf("sucesso fd: %d\n", fd);
+	// printf("bytes: %d\n", BUFFER_SIZE);
+	i = 1;
 
-// 	while (i < 6)
-// 	{
-// 		printf("\ntest%d: %s\n", i, get_next_line(fd));
-// 		// get_next_line(fd);
-// 		i++;
-// 	}
-// 	// printf("test1: %s\n", get_next_line(fd));
-// 	close(fd);
-// }
-// // // // gcc -Wall -Wextra -Werror -D BUFFER_SIZE=42 get_next_line.c get_next_line_utils.c
+	while (i < 6)
+	{
+		a = get_next_line(fd);
+
+		printf("\ntest%d: %s", i, a);
+		if (a[0] == '\n')
+			printf("oi");
+		// get_next_line(fd);
+		i++;
+	}
+	// printf("test1: %s\n", get_next_line(fd));
+	close(fd);
+}
+// // // gcc -Wall -Wextra -Werror -D BUFFER_SIZE=42 get_next_line.c get_next_line_utils.c
