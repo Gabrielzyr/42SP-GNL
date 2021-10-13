@@ -1,132 +1,74 @@
 #include <stdio.h>
 #include "get_next_line.h"
 
-static char *get_line(char *buffer)
+static char *get_read_file(int fd, char **save, char *line, ssize_t i)
 {
-	char *line;
-	char *temp;
-	size_t i;
-	size_t buf_len;
+	char	temp_line[BUFFER_SIZE + 1];
 
-	i = 0;
-	while (buffer[i] != '\n' && buffer[i])
-		i++;
-	if (buffer[i] == '\n')
-	{
-		line = ft_substr(buffer, 0, i+1);
-		temp = ft_strdup("");
-		buf_len = 0;
-		while (buffer[buf_len])
-			buf_len++;
-		temp = ft_strdup(buffer + (i+1));
-		free(buffer);
-		buffer = NULL;
-		if (*temp)
-		{
-			printf("error");
-			buffer = ft_strdup(temp);
-		}
-		free (temp);
-	}
-	else
-	{
-		line = ft_strdup(buffer);
-		free(buffer);
-		buffer = NULL;
-		printf("\nbuffer no line: %s\n", buffer);
-
-		return(line);
-	}
-	printf("\nbuffer no line: %s\n", buffer);
-	return (line);
-}
-
-static char *get_read_file(int fd)
-{
-	// char *line;
-	static char *buffer;
-	char *temp_buffer;
-	char *temp;
-	size_t buf_len;
-	ssize_t i;
-
-	temp_buffer = ft_strdup("");
-	// printf("temp1: %s", temp_buffer);
-	i = read(fd, temp_buffer, BUFFER_SIZE);
-	// printf("temp2: %s", temp_buffer);
-	printf("buffer: %s", buffer);
 	while (i > 0)
 	{
-		printf("aqui %lu", i);
-		temp_buffer[i] = '\0';
-		if (!buffer)
-			buffer = ft_strdup("");
-		temp = ft_strdup(buffer);
-		free(buffer);
-		buffer = ft_strjoin(temp, temp_buffer);
-		if (ft_strchr(buffer, '\n'))
-			break;
-		i = read(fd, temp_buffer, BUFFER_SIZE);
+		i = read(fd, temp_line, BUFFER_SIZE);
+		temp_line[i] = '\0';
+		line = ft_strjoin_free(line, temp_line);
+		if (ft_strchr(line, '\n'))
+		{
+			*save = ft_strdup(ft_strchr(line, '\n') + 1);
+			line = ft_substr_free(line, 0, ft_strlen(line) - ft_strlen(*save));
+			break ;
+		}
 	}
-	free(temp_buffer);
-	buf_len = 0;
-	while(buffer[buf_len])
-		buf_len++;
-	if (i == 0 && buffer == 0)
+	if (i == 0 && line[i] == '\0')
+	{
+		free(line);
+		line = NULL;
 		return (NULL);
-	return (get_line(buffer));
+	}
+	return (line);
 }
 
 char *get_next_line(int fd)
 {
-	char *buffer;
-	// char *line;
-	ssize_t res;
+	static char *save;
+	char 	*line;
 
-	buffer = NULL;
-	res = read(fd, buffer, 0);
-	if (fd < 0 || res == -1 || BUFFER_SIZE < 1)
-		return (NULL);
-	// line = ft_strdup("");
-	// line = get_read_file(fd, buffer, line);
-	// if (line >= 0)
-	// {
-	// 	free(line);
-	// 	line = NULL;
-	// 	return (line);
-	// }
-	return (get_read_file(fd));
-}
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-int main (void)
-{
-
-	int fd = open("./teste3.txt", O_RDONLY);
-	int i;
-	char *a;
-	// char *test;
-	// test = get_next_line(fd);
-	// if (fd == -1)
-	// 	printf("error fd\n");
-	// else
-	// 	printf("sucesso fd: %d\n", fd);
-	// printf("bytes: %d\n", BUFFER_SIZE);
-	i = 1;
-
-	while (i < 6)
+	line = ft_strdup("");
+	if (fd < 0 || BUFFER_SIZE < 1 || (read(fd, line, 0) < 0))
 	{
-		a = get_next_line(fd);
-
-		printf("\ntest%d: %s", i, a);
-		if (a[0] == '\n')
-			printf("oi");
-		// get_next_line(fd);
-		i++;
+		free(line);
+		return (NULL);
 	}
-	// printf("test1: %s\n", get_next_line(fd));
-	close(fd);
+	free(line);
+	if (!save)
+		save = ft_strdup("");
+	line = ft_strdup(save);
+	free(save);
+	save = NULL;
+	return (get_read_file(fd, &save, line, 1));
 }
+
+// #include <sys/types.h>
+// #include <sys/stat.h>
+// #include <fcntl.h>
+// int main (void)
+// {
+
+// 	int fd = open("./teste3.txt", O_RDONLY);
+// 	int i;
+// 	char *a;
+
+// 	i = 1;
+
+// 	while (i < 6)
+// 	{
+// 		a = get_next_line(fd);
+// 		printf("test%d: %s", i, a);
+// 		free(a);
+// 		i++;
+// 	}
+// 	// printf("test1: %s\n", get_next_line(fd));
+// 	close(fd);
+// 	return(0);
+// }
 // // // gcc -Wall -Wextra -Werror -D BUFFER_SIZE=42 get_next_line.c get_next_line_utils.c
+
+//sudo pip3 install --upgrade 
