@@ -1,8 +1,20 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line_utils.c                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: gamonte- <gamonte-@student.42sp.org.br>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/10/12 22:51:37 by gamonte-          #+#    #+#             */
+/*   Updated: 2021/10/12 22:55:58 by gamonte-         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "get_next_line.h"
 
-size_t ft_strlen(const char *s)
+size_t	ft_strlen(const char *s)
 {
-	size_t i;
+	size_t	i;
 
 	i = 0;
 	while (s[i])
@@ -12,13 +24,13 @@ size_t ft_strlen(const char *s)
 
 char	*ft_strjoin_free(char *s1, char const *s2)
 {
-	char *new_str;
-	size_t i;
-	size_t j;
+	char	*new_str;
+	size_t	i;
+	size_t	j;
 
 	new_str = malloc((ft_strlen(s1) + ft_strlen(s2) + 1));
 	i = 0;
-	while(s1[i])
+	while (s1[i])
 	{
 		new_str[i] = s1[i];
 		i++;
@@ -26,18 +38,18 @@ char	*ft_strjoin_free(char *s1, char const *s2)
 	j = 0;
 	while (s2[j])
 	{
-		new_str[i+j] = s2[j];
+		new_str[i + j] = s2[j];
 		j++;
 	}
-	new_str[i+j] = '\0';
+	new_str[i + j] = '\0';
 	free(s1);
 	return (new_str);
 }
 
 char	*ft_strdup(const char *s)
 {
-	char *dup;
-	size_t i;
+	char	*dup;
+	size_t	i;
 
 	dup = malloc(ft_strlen(s) + 1);
 	i = 0;
@@ -50,9 +62,9 @@ char	*ft_strdup(const char *s)
 	return (dup);
 }
 
-char *ft_strchr(const char *s, int c)
+char	*ft_strchr(const char *s, int c)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	while (s[i])
@@ -68,14 +80,13 @@ char *ft_strchr(const char *s, int c)
 
 char	*ft_substr_free(char *s, unsigned int start, size_t len)
 {
-	char *new_str;
-	size_t i;
-	size_t st;
+	char	*new_str;
+	size_t	i;
+	size_t	st;
 
 	if (!s)
 		return (0);
 	st = (size_t)start;
-
 	new_str = malloc((len + 1) * sizeof(char));
 	if (!new_str)
 	{
