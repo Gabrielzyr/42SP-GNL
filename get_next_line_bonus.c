@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gamonte- <gamonte-@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 22:51:01 by gamonte-          #+#    #+#             */
-/*   Updated: 2021/10/12 23:05:14 by gamonte-         ###   ########.fr       */
+/*   Updated: 2021/10/12 23:15:16 by gamonte-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 static char	*get_read_file(int fd, char **save, char *line, ssize_t i)
 {
@@ -39,7 +39,7 @@ static char	*get_read_file(int fd, char **save, char *line, ssize_t i)
 
 char	*get_next_line(int fd)
 {
-	static char	*save;
+	static char	*save[256];
 	char		*line;
 
 	line = ft_strdup("");
@@ -49,10 +49,10 @@ char	*get_next_line(int fd)
 		return (NULL);
 	}
 	free(line);
-	if (!save)
-		save = ft_strdup("");
-	line = ft_strdup(save);
-	free(save);
-	save = NULL;
-	return (get_read_file(fd, &save, line, 1));
+	if (!save[fd])
+		save[fd] = ft_strdup("");
+	line = ft_strdup(save[fd]);
+	free(save[fd]);
+	save[fd] = NULL;
+	return (get_read_file(fd, &save[fd], line, 1));
 }
