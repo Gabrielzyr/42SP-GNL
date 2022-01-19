@@ -6,7 +6,7 @@
 /*   By: gamonte- <gamonte-@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 22:51:37 by gamonte-          #+#    #+#             */
-/*   Updated: 2021/10/12 23:05:48 by gamonte-         ###   ########.fr       */
+/*   Updated: 2021/10/13 12:57:35 by gamonte-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,8 @@ char	*ft_strjoin_free(char *s1, char const *s2)
 
 	new_str = malloc((ft_strlen(s1) + ft_strlen(s2) + 1));
 	i = 0;
+	if (!new_str)
+		return (0);
 	while (s1[i])
 	{
 		new_str[i] = s1[i];
@@ -50,8 +52,12 @@ char	*ft_strdup(const char *s)
 {
 	char	*dup;
 	size_t	i;
+	size_t	s_len;
 
-	dup = malloc(ft_strlen(s) + 1);
+	s_len = 0;
+	while (s[s_len])
+		s_len++;
+	dup = malloc(s_len + 1);
 	i = 0;
 	while (s[i])
 	{
